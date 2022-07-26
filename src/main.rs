@@ -9,7 +9,9 @@ fn main() -> io::Result<()> {
         input.push_str(&arg);
     }
 
-    let output = crate::to_cypher(input.as_str());
+    let default_pangram = "abcdefghijklmnopqrstuvwxyz";
+
+    let output = crate::to_cypher(input.as_str(), default_pangram);
 
     let mut stdout = io::stdout().lock();
     stdout.write_all(output.as_bytes()).unwrap();
@@ -17,9 +19,10 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-pub fn to_cypher(input: &str) -> String {
-    let default_cypher = "abcdefghijklmnopqrstuvwxyz";
-    let cypher = default_cypher.to_string();
+pub fn to_cypher(input: &str, pangram: &str) -> String {
+    let words: Vec<&str> = pangram.split_whitespace().collect();
+    let cypher = words.join("");
+    //let cypher = pangram.to_string();
     let mut output = String::new();
 
     let lower_input = input.to_lowercase();
@@ -43,10 +46,23 @@ mod main_tests {
     #[test]
     fn it_generates_cypher() {
         let input = "Hello world";
+        let pangram = "abcdefghijklmnopqrstuvwxyz";
 
         let expected_output = "8.5.12.12.15.23.15.18.12.4";
 
-        let output = crate::to_cypher(input);
+        let output = crate::to_cypher(input, pangram);
+
+        assert_eq!(output, expected_output);
+    }
+
+    #[test]
+    fn it_generates_cypher_from_custom_pangram() {
+        let input = "Hello world";
+        let pangram = "Sphinx of black quartz judge my vow";
+
+        let expected_output = "3.24.10.10.7.29.7.17.10.22";
+
+        let output = crate::to_cypher(input, pangram);
 
         assert_eq!(output, expected_output);
     }
