@@ -5,13 +5,27 @@ fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
     let mut input = String::new();
-    for arg in args[1..].iter() {
+
+    if args[1] == "--help" {
+        println!("Usage: {} <input>", args[0]);
+        return Ok(());
+    }
+
+    let mut input_start = 1;
+
+    let mut pangram = "abcdefghijklmnopqrstuvwxyz";
+
+    if args[1] == "-p" || args[1] == "--pangram" {
+        pangram = args[2].as_str();
+        input_start = 3;
+    }
+
+    for arg in args[input_start..].iter() {
         input.push_str(&arg);
     }
 
-    let default_pangram = "abcdefghijklmnopqrstuvwxyz";
 
-    let output = crate::to_cypher(input.as_str(), default_pangram);
+    let output = crate::to_cypher(input.as_str(), pangram);
 
     let mut stdout = io::stdout().lock();
     stdout.write_all(output.as_bytes()).unwrap();
