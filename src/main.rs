@@ -6,8 +6,8 @@ fn main() -> io::Result<()> {
 
     let mut input = String::new();
 
-    if args[1] == "--help" {
-        println!("Usage: {} <input>", args[0]);
+    if args.len() == 1 || args[1] == "--help" {
+        println!("Usage: {} [-p | --pangram <string>] <input>", args[0]);
         return Ok(());
     }
 
