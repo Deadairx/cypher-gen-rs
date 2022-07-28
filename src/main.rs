@@ -20,12 +20,18 @@ fn main() -> io::Result<()> {
         input_start = 3;
     }
 
+    let mut separator = ".";
+
+    if args[1] == "-s" || args[1] == "--separator" {
+        separator = args[2].as_str();
+        input_start = 3;
+    }
+
     for arg in args[input_start..].iter() {
         input.push_str(&arg);
     }
 
-
-    let output = crate::to_cypher(input.as_str(), pangram);
+    let output = crate::to_cypher(input.as_str(), pangram, separator);
 
     let mut stdout = io::stdout().lock();
     stdout.write_all(output.as_bytes()).unwrap();
@@ -33,7 +39,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-pub fn to_cypher(input: &str, pangram: &str) -> String {
+pub fn to_cypher(input: &str, pangram: &str, separator: &str) -> String {
     let words: Vec<&str> = pangram.split_whitespace().collect();
     let cypher = words.join("");
     //let cypher = pangram.to_string();
@@ -44,7 +50,7 @@ pub fn to_cypher(input: &str, pangram: &str) -> String {
     for c in lower_input.chars() {
         if c.is_alphabetic() {
             if !output.is_empty() {
-                output.push_str(".");
+                output.push_str(separator);
             }
 
             let index = cypher.find(c).unwrap();
@@ -61,10 +67,11 @@ mod main_tests {
     fn it_generates_cypher() {
         let input = "Hello world";
         let pangram = "abcdefghijklmnopqrstuvwxyz";
+        let separator = ".";
 
         let expected_output = "8.5.12.12.15.23.15.18.12.4";
 
-        let output = crate::to_cypher(input, pangram);
+        let output = crate::to_cypher(input, pangram, separator);
 
         assert_eq!(output, expected_output);
     }
@@ -73,10 +80,24 @@ mod main_tests {
     fn it_generates_cypher_from_custom_pangram() {
         let input = "Hello world";
         let pangram = "Sphinx of black quartz judge my vow";
+        let separator = ".";
 
         let expected_output = "3.24.10.10.7.29.7.17.10.22";
 
-        let output = crate::to_cypher(input, pangram);
+        let output = crate::to_cypher(input, pangram, separator);
+
+        assert_eq!(output, expected_output);
+    }
+
+    #[test]
+    fn it_outputs_custom_separator_text() {
+        let input = "Hello world";
+        let pangram = "abcdefghijklmnopqrstuvwxyz";
+        let separator = ", ";
+
+        let expected_output = "8, 5, 12, 12, 15, 23, 15, 18, 12, 4";
+
+        let output = crate::to_cypher(input, pangram, separator);
 
         assert_eq!(output, expected_output);
     }
