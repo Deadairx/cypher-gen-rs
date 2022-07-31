@@ -1,7 +1,16 @@
 use std::env;
 use std::io::{self, Write};
+use clap::{Command, arg};
 
 fn main() -> io::Result<()> {
+    let matches = Command::new("cypher-gen")
+        .args(&[
+            arg!(pangram: -p --pangram [PANGRAM] "Sets the pangram map used for the cypher (default a-z)"),
+            arg!(separator: -s --separator [SEPARATOR] "Sets the separator used for the cypher (default '.')"),
+            arg!(<INPUT> "The input text to be encrypted"),
+        ])
+        .get_matches();
+
     let args: Vec<String> = env::args().collect();
 
     let mut input = String::new();
@@ -11,24 +20,22 @@ fn main() -> io::Result<()> {
         return Ok(());
     }
 
-    let mut input_start = 1;
-
     let mut pangram = "abcdefghijklmnopqrstuvwxyz";
 
-    if args[1] == "-p" || args[1] == "--pangram" {
-        pangram = args[2].as_str();
-        input_start = 3;
+    if let Some(p) = matches.get_one::<String>("pangram") {
+        pangram = p;
     }
+
+    println!("Pangram: {}", &pangram);
 
     let mut separator = ".";
 
-    if args[1] == "-s" || args[1] == "--separator" {
-        separator = args[2].as_str();
-        input_start = 3;
+    if let Some(s) = matches.get_one::<String>("separator") {
+        separator = s;
     }
 
-    for arg in args[input_start..].iter() {
-        input.push_str(&arg);
+    if let Some(i) = matches.get_one::<String>("INPUT") {
+        input = i.to_string();
     }
 
     let output = crate::to_cypher(input.as_str(), pangram, separator);
