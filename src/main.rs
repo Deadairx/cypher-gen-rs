@@ -41,7 +41,7 @@ fn main() -> io::Result<()> {
 
 pub fn to_cypher(input: &str, pangram: &str, separator: &str) -> String {
     let words: Vec<&str> = pangram.split_whitespace().collect();
-    let cypher = words.join("");
+    let cypher = words.join("").to_lowercase();
     //let cypher = pangram.to_string();
     let mut output = String::new();
 
@@ -93,6 +93,19 @@ mod main_tests {
     fn it_outputs_custom_separator_text() {
         let input = "Hello world";
         let pangram = "abcdefghijklmnopqrstuvwxyz";
+        let separator = ", ";
+
+        let expected_output = "8, 5, 12, 12, 15, 23, 15, 18, 12, 4";
+
+        let output = crate::to_cypher(input, pangram, separator);
+
+        assert_eq!(output, expected_output);
+    }
+
+    #[test]
+    fn it_handles_uppercase_pangram() {
+        let input = "Hello world";
+        let pangram = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let separator = ", ";
 
         let expected_output = "8, 5, 12, 12, 15, 23, 15, 18, 12, 4";
