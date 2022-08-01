@@ -1,6 +1,7 @@
 use std::env;
 use std::io::{self, Write};
 use clap::{Command, arg};
+use itertools::Itertools;
 
 fn main() -> io::Result<()> {
     let matches = Command::new("cypher-gen")
@@ -54,9 +55,7 @@ fn main() -> io::Result<()> {
 }
 
 pub fn decrypt_cypher(input: Vec<i32>, pangram: &str) -> String {
-    let pangram = pangram.to_lowercase();
-    let pangram_words: Vec<&str> = pangram.split_whitespace().collect();
-    let pangram = pangram_words.join("");
+    let pangram = crate::unique_chars(pangram);
 
     let mut output = String::new();
     for i in input {
@@ -66,10 +65,15 @@ pub fn decrypt_cypher(input: Vec<i32>, pangram: &str) -> String {
     return output;
 }
 
+fn unique_chars(pangram: &str) -> String {
+    let pangram = pangram.to_lowercase();
+
+    pangram.chars().into_iter().unique().filter(|x| !x.is_whitespace()).collect()
+}
+
 pub fn to_cypher(input: &str, pangram: &str, separator: &str) -> String {
-    let words: Vec<&str> = pangram.split_whitespace().collect();
-    let cypher = words.join("").to_lowercase();
-    //let cypher = pangram.to_string();
+    let pangram = crate::unique_chars(pangram);
+
     let mut output = String::new();
 
     let lower_input = input.to_lowercase();
@@ -80,7 +84,7 @@ pub fn to_cypher(input: &str, pangram: &str, separator: &str) -> String {
                 output.push_str(separator);
             }
 
-            let index = cypher.find(c).unwrap();
+            let index = pangram.find(c).unwrap();
             output.push_str((index+1).to_string().as_str());
         }
     }
@@ -109,7 +113,7 @@ mod main_tests {
         let pangram = "Sphinx of black quartz judge my vow";
         let separator = ".";
 
-        let expected_output = "3.24.10.10.7.29.7.17.10.22";
+        let expected_output = "3.22.10.10.7.26.7.16.10.20";
 
         let output = crate::to_cypher(input, pangram, separator);
 
@@ -156,7 +160,7 @@ mod main_tests {
 
     #[test]
     fn decrypt_cypher_given_pangram_with_spaces_ignores_whitespace() {
-        let input_numbers = vec![3, 24, 10, 10, 7, 29, 7, 17, 10, 22];
+        let input_numbers = vec![3, 22, 10, 10, 7, 26, 7, 16, 10, 20];
         let pangram = "Sphinx of black quartz judge my vow";
 
         let expected_output = "helloworld";
