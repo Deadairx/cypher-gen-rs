@@ -39,15 +39,13 @@ fn main() -> io::Result<()> {
         input = i.to_string();
     }
 
-    let output: String;
-
-    if matches.is_present("decrypt") {
+    let output = if matches.is_present("decrypt") {
         let input_vec: Vec<i32> = input.split(separator).map(|x| x.parse::<i32>().unwrap()).collect();
         
-        output = crate::decrypt_cypher(input_vec, pangram);
+        crate::decrypt_cypher(input_vec, pangram)
     } else {
-        output = crate::to_cypher(input.as_str(), pangram, separator);
-    }
+        crate::to_cypher(input.as_str(), pangram, separator)
+    };
 
     let mut stdout = io::stdout().lock();
     stdout.write_all(output.as_bytes()).unwrap();
