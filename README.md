@@ -12,7 +12,7 @@ and is intended to be a simple Dungeon Master tool for some D&D puzzles.
 
 add `-p --pangram <string>` to use custom pangram as source (default `a-z`)
 
-> (example: `-p "Sphinx of black quartz judge my vow" "Hello, World!"` output: `3.24.10.10.7.29.7.17.10.22`)
+> (example: `-p "Sphinx of black quartz judge my vow" "Hello, World!"` output: `3.22.10.10.7.26.7.16.10.20`)
 
 add `-s --separator <string>` to change separator (default `.`)
 
