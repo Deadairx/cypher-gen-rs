@@ -53,6 +53,8 @@ fn main() -> io::Result<()> {
         crate::to_cypher(input.as_str(), pangram, separator, number)
     };
 
+    let output = output + "\n";
+
     let mut stdout = io::stdout().lock();
     stdout.write_all(output.as_bytes()).unwrap();
 
