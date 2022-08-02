@@ -43,12 +43,12 @@ fn main() -> io::Result<()> {
 
     let default_number = "1".to_string();
     let number = matches.get_one::<String>("start_number").unwrap_or(&default_number);
-    let number = number.parse::<usize>().unwrap();
+    let number = number.parse::<isize>().unwrap();
 
     let output = if matches.is_present("decrypt") {
         let input_vec: Vec<i32> = input.split(separator).map(|x| x.parse::<i32>().unwrap()).collect();
         
-        crate::decrypt_cypher(input_vec, pangram)
+        crate::decrypt_cypher(input_vec, pangram, number)
     } else {
         crate::to_cypher(input.as_str(), pangram, separator, number)
     };
@@ -59,12 +59,13 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-pub fn decrypt_cypher(input: Vec<i32>, pangram: &str) -> String {
+pub fn decrypt_cypher(input: Vec<i32>, pangram: &str, start_number: isize) -> String {
     let pangram = crate::unique_chars(pangram);
 
     let mut output = String::new();
     for i in input {
-        output.push(pangram.chars().nth((i-1).try_into().unwrap()).unwrap());
+        let i = i as isize;
+        output.push(pangram.chars().nth((crate::wrap_on_limit(i-start_number, 26)).try_into().unwrap()).unwrap());
     }
 
     return output;
@@ -76,13 +77,15 @@ fn unique_chars(pangram: &str) -> String {
     pangram.chars().into_iter().unique().filter(|x| !x.is_whitespace()).collect()
 }
 
-fn wrap_on_limit(index: usize, limit: usize) -> usize {
+fn wrap_on_limit(index: isize, limit: isize) -> isize {
+    let index = if index < 0 { index + limit } else { index };
+
     let output = index % limit;
 
     if output == 0 { limit } else { output }
 }
 
-pub fn to_cypher(input: &str, pangram: &str, separator: &str, start_number: usize) -> String {
+pub fn to_cypher(input: &str, pangram: &str, separator: &str, start_number: isize) -> String {
     let pangram = crate::unique_chars(pangram);
 
     let mut output = String::new();
@@ -95,7 +98,7 @@ pub fn to_cypher(input: &str, pangram: &str, separator: &str, start_number: usiz
                 output.push_str(separator);
             }
 
-            let index = pangram.find(c).unwrap();
+            let index = pangram.find(c).unwrap() as isize;
             output.push_str((crate::wrap_on_limit(index+start_number, 26)).to_string().as_str());
         }
     }
@@ -164,7 +167,7 @@ mod main_tests {
 
         let expected_output = "helloworld";
 
-        let output = crate::decrypt_cypher(input_numbers, pangram);
+        let output = crate::decrypt_cypher(input_numbers, pangram, 1);
 
         assert_eq!(output, expected_output);
     }
@@ -176,7 +179,7 @@ mod main_tests {
 
         let expected_output = "helloworld";
 
-        let output = crate::decrypt_cypher(input_numbers, pangram);
+        let output = crate::decrypt_cypher(input_numbers, pangram, 1);
 
         assert_eq!(output, expected_output);
     }
@@ -188,7 +191,7 @@ mod main_tests {
 
         let expected_output = "helloworld";
 
-        let output = crate::decrypt_cypher(input_numbers, pangram);
+        let output = crate::decrypt_cypher(input_numbers, pangram, 1);
 
         assert_eq!(output, expected_output);
     }
@@ -203,6 +206,19 @@ mod main_tests {
         let expected_output = "4.5.6.1.2.3";
 
         let output = crate::to_cypher(input, pangram, separator, start_number);
+
+        assert_eq!(output, expected_output);
+    }
+
+    #[test]
+    fn decrypt_cypher_given_non_default_start_number_decypts_cypher_with_that_number_as_offset() {
+        let input_numbers = vec![14, 12, 15, 3, 9, 1, 21];
+        let pangram = "Sphinx of black quartz judge my vow";
+        let start_number = 4;
+
+        let expected_output = "abcwxyz";
+
+        let output = crate::decrypt_cypher(input_numbers, pangram, start_number);
 
         assert_eq!(output, expected_output);
     }
